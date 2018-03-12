@@ -1,0 +1,4 @@
+#exclude data from repository
+
+stateOfCampus\platforms\**
+.idea\**
