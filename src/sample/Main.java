@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.animation.PathTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
@@ -7,9 +9,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
@@ -26,7 +30,8 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("sample/sample.fxml"));
             Parent root = loader.load();
             Canvas canvas = (Canvas) loader.getNamespace().get("canvas");
-            drawShapes(canvas.getGraphicsContext2D());
+            GridPane gp = (GridPane) loader.getNamespace().get("pane");
+            drawShapes(gp, canvas.getGraphicsContext2D());
             primaryStage.setScene(new Scene(root));
             primaryStage.show();
         }catch (IOException ioe){
@@ -34,7 +39,31 @@ public class Main extends Application {
         }
     }
 
-    private void drawShapes(GraphicsContext gc) {
+    private void drawShapes(GridPane gp, GraphicsContext gc) {
+        final Circle rect1 = new Circle(10, 10, 100);
+
+        rect1.setFill(Color.RED);
+        PathElement[] elements =
+                {
+                        new MoveTo(0, 300),
+                        new LineTo(300, 400),
+                        new LineTo(400, 100),
+                        new LineTo(100, 0),
+                        new LineTo(0, 300),
+                        new ClosePath()
+                };
+        Path path = new Path();
+        path.getElements().addAll(elements);
+        PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(4000));
+        pathTransition.setPath(path);
+        pathTransition.setNode(rect1);
+        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+        pathTransition.setCycleCount(Timeline.INDEFINITE);
+        pathTransition.setAutoReverse(true);
+        gp.add(rect1,1,1);
+        pathTransition.play();
+
         gc.setFill(Color.GREEN);
         gc.setStroke(Color.BLUE);
         gc.setLineWidth(2);
