@@ -1,13 +1,17 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class Main extends Application {
 
@@ -17,14 +21,17 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Drawing Operations Test");
-        Group root = new Group();
-        Canvas canvas = new Canvas(300, 250);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        drawShapes(gc);
-        root.getChildren().add(canvas);
-        primaryStage.setScene(new Scene(root));
-        primaryStage.show();
+        try{
+            primaryStage.setTitle("Drawing Operations Test");
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("sample/sample.fxml"));
+            Parent root = loader.load();
+            Canvas canvas = (Canvas) loader.getNamespace().get("canvas");
+            drawShapes(canvas.getGraphicsContext2D());
+            primaryStage.setScene(new Scene(root));
+            primaryStage.show();
+        }catch (IOException ioe){
+            // do nothing
+        }
     }
 
     private void drawShapes(GraphicsContext gc) {
@@ -35,4 +42,5 @@ public class Main extends Application {
         gc.strokePolygon(new double[]{100,30,30}, new double[]{125,50,175},3);
         gc.strokePolygon(new double[]{200,270,270}, new double[]{125,50,175},3);
     }
+
 }
