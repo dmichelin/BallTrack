@@ -41,7 +41,6 @@ public class SimulatedDistributedNode {
         {
             //Enter Critical Region
         }
-
     }
     //get a request. If the timestamp attached to that request is greater than this node's timestamp,
     //then set this timestamp equal to the incoming one.
@@ -54,6 +53,11 @@ public class SimulatedDistributedNode {
         if(req.getType() == reqType.Request) {
             pendingJobQueue.add(req);
         }
+        //pop the top of the queue if a release is sent.
+        else if (req.getType() == reqType.Release)
+        {
+            pendingJobQueue.poll();
+        }
         //add acknowledgements to a hashmap so we can enter CR when it's filled
         else
         {
@@ -61,6 +65,13 @@ public class SimulatedDistributedNode {
         }
     }
 
+    //send Acknowledgement
+    private void sendAck(SimulatedDistributedNode node)
+    {
+        if(node.getProcessID().equals(pendingJobQueue.peek().getRequestingNode().getProcessID())) {
+            node.receiveRequest(new Request(this, reqType.Reply));
+        }
+    }
     //Return list of connectedNodes
     public List<SimulatedDistributedNode> getConnectedNodes() {
         return connectedNodes;

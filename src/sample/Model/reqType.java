@@ -1,5 +1,5 @@
 package sample.Model;
 
 public enum reqType {
-    Request, Reply
+    Request, Reply, Release
 }
