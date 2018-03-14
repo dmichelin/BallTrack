@@ -1,4 +1,6 @@
 package sample.Model;
 
-public class Task {
+public class Request {
+    private SimulatedDistributedNode requestingNode;
+
 }
