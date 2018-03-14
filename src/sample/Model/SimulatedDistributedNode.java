@@ -15,11 +15,16 @@ public class SimulatedDistributedNode {
 
     public void requestPermissionToEnterCS(){
         timeStamp++;
-        connectedNodes.parallelStream().forEach(node -> node.getPendingJobQueue().add(new Request()));
+        connectedNodes.parallelStream().forEach(node -> node.getPendingJobQueue().add(new Request(this)));
     }
-
-    public void recieveRequest(SimulatedDistributedNode node){
-        
+    //get a request. If the timestamp attached to that request is greater than this node's timestamp,
+    //then set this timestamp equal to the incoming one.
+    public void receiveRequest(Request req){
+        if (req.getRequestingNode().getTimeStamp() > this.timeStamp)
+        {
+            this.timeStamp = req.getRequestingNode().getTimeStamp();
+        }
+        pendingJobQueue.add(req);
     }
 
     public List<SimulatedDistributedNode> getConnectedNodes() {
@@ -37,4 +42,13 @@ public class SimulatedDistributedNode {
     private void setPendingJobQueue(List<Request> pendingJobQueue) {
         this.pendingJobQueue = pendingJobQueue;
     }
+    //Get Timestamp
+    public int getTimeStamp() {
+        return timeStamp;
+    }
+    //Set this timestamp
+    public void setTimeStamp(int timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
 }
