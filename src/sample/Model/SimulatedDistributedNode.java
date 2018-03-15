@@ -63,6 +63,9 @@ public class SimulatedDistributedNode {
             case Reply:
                 //add acknowledgements to a hashmap so we can enter CR when it's filled
                 acknowledgements.put(req.getRequestingNode().getProcessID(), true);
+                if(acknowledgements.size()>=connectedNodes.size()){
+                    enterCriticalSection();
+                }
                 break;
             case Release:
                 pendingJobQueue.poll();
@@ -82,7 +85,7 @@ public class SimulatedDistributedNode {
     /*
         Set state to not be in Critical Region & send release to all connected nodes.
      */
-   private void leaveCriticalSection() {
+   public void leaveCriticalSection() {
      setInCrit(false);
      connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Release)));
    }

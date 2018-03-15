@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Text?>
-<GridPane fx:controller="sample.Controller"
+<GridPane
           xmlns:fx="http://javafx.com/fxml" fx:id="pane" alignment="center">
     <HBox GridPane.columnIndex="1" GridPane.rowIndex="0">
         <Text text="Number of Nodes"/>
