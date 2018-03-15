@@ -18,12 +18,12 @@ public class SimulatedDistributedNode {
     The priorityqueue is expected to come from the priorityqueue(int initialCapacity, Comparator<Request> RequestCompare) constructor
 
      */
-    public SimulatedDistributedNode(List<SimulatedDistributedNode> connectedNodes, PriorityQueue<Request> jobQueue, int pid) {
-        this.connectedNodes = connectedNodes;
-        this.pendingJobQueue = jobQueue;
+    public SimulatedDistributedNode(int pid) {
+        this.connectedNodes = new ArrayList<>();
+        this.pendingJobQueue = new PriorityQueue<>();
         this.timeStamp = 0;
         this.processID = pid;
-        this.acknowledgements = new Hashtable<Integer, Boolean>();
+        this.acknowledgements = new Hashtable<>();
     }
 
 
@@ -35,7 +35,7 @@ public class SimulatedDistributedNode {
     public void requestPermissionToEnterCS(){
        Boolean hashFULL = checkAcknowledgements();
         timeStamp++;
-        connectedNodes.parallelStream().forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
+        connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
 
         if(this.getProcessID().equals(pendingJobQueue.peek().getRequestingNode().getProcessID())&& hashFULL)
         {
@@ -49,20 +49,18 @@ public class SimulatedDistributedNode {
         {
             setTimeStamp(req.getTimestamp()+1);
         }
-        //add requests to the queue
-        if(req.getType() == reqType.Request) {
-            pendingJobQueue.add(req);
+        switch (req.getType()){
+            case Request:
+                pendingJobQueue.add(req);
+                break;
+            case Reply:
+                //add acknowledgements to a hashmap so we can enter CR when it's filled
+                acknowledgements.put(req.getRequestingNode().getProcessID(), true);
+            case Release:
+                pendingJobQueue.poll();
+                break;
         }
-        //pop the top of the queue if a release is sent.
-        else if (req.getType() == reqType.Release)
-        {
-            pendingJobQueue.poll();
-        }
-        //add acknowledgements to a hashmap so we can enter CR when it's filled
-        else
-        {
-            acknowledgements.put(req.getRequestingNode().getProcessID(), Boolean.TRUE);
-        }
+
     }
 
     //send Acknowledgement
@@ -78,7 +76,7 @@ public class SimulatedDistributedNode {
     }
 
     //set the list of connectedNodes
-    private void setConnectedNodes(List<SimulatedDistributedNode> connectedNodes) {
+    public void setConnectedNodes(List<SimulatedDistributedNode> connectedNodes) {
         this.connectedNodes = connectedNodes;
     }
 
@@ -117,6 +115,5 @@ public class SimulatedDistributedNode {
 
         }
         return true;
-
     }
 }
