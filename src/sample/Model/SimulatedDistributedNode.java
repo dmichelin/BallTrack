@@ -1,5 +1,7 @@
 package sample.Model;
 
+import sample.Controller;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -10,6 +12,7 @@ public class SimulatedDistributedNode {
     private List<SimulatedDistributedNode> connectedNodes;
     private PriorityQueue<Request> pendingJobQueue;
     private Hashtable<Integer, Boolean> acknowledgements;
+    private Controller controller;
     private int timeStamp;
     private int processID;
 
@@ -18,7 +21,8 @@ public class SimulatedDistributedNode {
     The priorityqueue is expected to come from the priorityqueue(int initialCapacity, Comparator<Request> RequestCompare) constructor
 
      */
-    public SimulatedDistributedNode(int pid) {
+    public SimulatedDistributedNode(int pid,Controller c) {
+        this.controller = c;
         this.connectedNodes = new ArrayList<>();
         this.pendingJobQueue = new PriorityQueue<>();
         this.timeStamp = 0;
@@ -36,11 +40,6 @@ public class SimulatedDistributedNode {
        Boolean hashFULL = checkAcknowledgements();
         timeStamp++;
         connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
-
-        if(this.getProcessID().equals(pendingJobQueue.peek().getRequestingNode().getProcessID())&& hashFULL)
-        {
-            //Enter Critical Region
-        }
     }
     //get a request. If the timestamp attached to that request is greater than this node's timestamp,
     //then set this timestamp equal to the incoming one.
@@ -52,23 +51,31 @@ public class SimulatedDistributedNode {
         switch (req.getType()){
             case Request:
                 pendingJobQueue.add(req);
+                // if requesting node is at the top of the queue, send an ack
+                if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())){
+                    sendAck(req.getRequestingNode());
+                }
                 break;
             case Reply:
                 //add acknowledgements to a hashmap so we can enter CR when it's filled
                 acknowledgements.put(req.getRequestingNode().getProcessID(), true);
+                break;
             case Release:
                 pendingJobQueue.poll();
+                sendAck(pendingJobQueue.peek().getRequestingNode());
                 break;
         }
+
+    }
+    private void enterCriticalSection(){
 
     }
 
     //send Acknowledgement
     private void sendAck(SimulatedDistributedNode node)
     {
-        if(node.getProcessID().equals(pendingJobQueue.peek().getRequestingNode().getProcessID())) {
-            node.receiveRequest(new Request(this, reqType.Reply));
-        }
+        node.receiveRequest(new Request(this, reqType.Reply));
+
     }
     //Return list of connectedNodes
     public List<SimulatedDistributedNode> getConnectedNodes() {

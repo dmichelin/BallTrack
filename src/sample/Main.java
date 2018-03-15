@@ -56,14 +56,14 @@ public class Main extends Application {
     }
     private void startSimulation(Group gp, GraphicsContext gc, Canvas canvas, int numNodes){
         // create the appropriate number of nodes
+        Controller controller = new Controller();
         List<SimulatedDistributedNode> allNodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {
-            allNodes.add(new SimulatedDistributedNode(i));
+            allNodes.add(new SimulatedDistributedNode(i,controller));
         }
         // have them all connected to each other
         for (int i = 0; i < numNodes; i++) {
             allNodes.get(i).setConnectedNodes(allNodes);
-
         }
         drawShapes(gp,gc,canvas);
     }
