@@ -15,6 +15,7 @@ public class SimulatedDistributedNode {
     private Controller controller;
     private int timeStamp;
     private int processID;
+    private boolean inCrit;
 
     /*
     Constructor
@@ -28,6 +29,7 @@ public class SimulatedDistributedNode {
         this.timeStamp = 0;
         this.processID = pid;
         this.acknowledgements = new Hashtable<>();
+        this.inCrit = false;
     }
 
 
@@ -41,8 +43,10 @@ public class SimulatedDistributedNode {
         timeStamp++;
         connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
     }
-    //get a request. If the timestamp attached to that request is greater than this node's timestamp,
-    //then set this timestamp equal to the incoming one.
+    /*
+    get a request. If the timestamp attached to that request is greater than this node's timestamp,
+    Then set this timestamp equal to the incoming one.
+     */
     public void receiveRequest(Request req){
         if (req.getTimestamp() > this.timeStamp)
         {
@@ -62,7 +66,10 @@ public class SimulatedDistributedNode {
                 break;
             case Release:
                 pendingJobQueue.poll();
-                sendAck(pendingJobQueue.peek().getRequestingNode());
+                //send an ack to the next in line if there is one such node.
+                if(!pendingJobQueue.isEmpty()) {
+                    sendAck(pendingJobQueue.peek().getRequestingNode());
+                }
                 break;
         }
 
@@ -70,6 +77,13 @@ public class SimulatedDistributedNode {
     private void enterCriticalSection(){
 
     }
+    /*
+        Set state to not be in Critical Region & send release to all connected nodes.
+     */
+   private void leaveCriticalSection() {
+     setInCrit(false);
+     connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Release)));
+   }
 
     //send Acknowledgement
     private void sendAck(SimulatedDistributedNode node)
@@ -122,5 +136,15 @@ public class SimulatedDistributedNode {
 
         }
         return true;
+    }
+    //determine if the node is in CR.
+    private boolean getInCrit()
+    {
+        return inCrit;
+    }
+    //change state of node to/from CR.
+    private void setInCrit(boolean x)
+    {
+        this.inCrit = x;
     }
 }
