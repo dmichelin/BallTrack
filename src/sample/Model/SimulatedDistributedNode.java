@@ -1,6 +1,6 @@
 package sample.Model;
 
-import sample.Controller;
+import sample.GuiController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class SimulatedDistributedNode {
     private List<SimulatedDistributedNode> connectedNodes;
     private PriorityQueue<Request> pendingJobQueue;
     private Hashtable<Integer, Boolean> acknowledgements;
-    private Controller controller;
+    private GuiController controller;
     private int timeStamp;
     private int processID;
     private boolean inCrit;
@@ -22,7 +22,7 @@ public class SimulatedDistributedNode {
     The priorityqueue is expected to come from the priorityqueue(int initialCapacity, Comparator<Request> RequestCompare) constructor
 
      */
-    public SimulatedDistributedNode(int pid,Controller c) {
+    public SimulatedDistributedNode(int pid, GuiController c) {
         this.controller = c;
         this.connectedNodes = new ArrayList<>();
         this.pendingJobQueue = new PriorityQueue<>();
@@ -75,7 +75,9 @@ public class SimulatedDistributedNode {
 
     }
     private void enterCriticalSection(){
-
+        acknowledgements = new Hashtable<>();
+        setInCrit(true);
+        controller.EnterCriticalSection(this);
     }
     /*
         Set state to not be in Critical Region & send release to all connected nodes.
