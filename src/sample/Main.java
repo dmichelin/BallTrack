@@ -62,8 +62,8 @@ public class Main extends Application {
         }
         // have them all connected to each other
         for (int i = 0; i < numNodes; i++) {
-            //allNodes.get(i).setConnectedNodes();
-            allNodes.add(new SimulatedDistributedNode(i));
+            allNodes.get(i).setConnectedNodes(allNodes);
+
         }
         drawShapes(gp,gc,canvas);
     }

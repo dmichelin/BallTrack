@@ -108,7 +108,7 @@ public class SimulatedDistributedNode {
     private Boolean checkAcknowledgements()
     {
         for (SimulatedDistributedNode node: connectedNodes) {
-            if (!acknowledgements.contains(node.getProcessID()))
+            if (!acknowledgements.containsKey(node.getProcessID()))
             {
                 return false;
             }
