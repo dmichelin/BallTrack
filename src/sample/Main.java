@@ -21,8 +21,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import sample.Model.SimulatedDistributedNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends Application {
 
@@ -52,7 +55,16 @@ public class Main extends Application {
         }
     }
     private void startSimulation(Group gp, GraphicsContext gc, Canvas canvas, int numNodes){
-
+        // create the appropriate number of nodes
+        List<SimulatedDistributedNode> allNodes = new ArrayList<>();
+        for (int i = 0; i < numNodes; i++) {
+            allNodes.add(new SimulatedDistributedNode(i));
+        }
+        // have them all connected to each other
+        for (int i = 0; i < numNodes; i++) {
+            //allNodes.get(i).setConnectedNodes();
+            allNodes.add(new SimulatedDistributedNode(i));
+        }
         drawShapes(gp,gc,canvas);
     }
 
