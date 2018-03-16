@@ -22,6 +22,7 @@ public class GuiController {
     private HashMap<Node,SimulatedDistributedNode> dotToNode;
     private HashMap<Node,Boolean> nodeIsOnLeftSide;
     private Group root;
+    private static boolean invalid;
     public static GuiController instance;
 
     public GuiController(Canvas canvas, List<SimulatedDistributedNode> nodes, Group root) {
@@ -54,7 +55,11 @@ public class GuiController {
         return instance;
     }
     public static void start(){
+        invalid = false;
         instance.run();
+    }
+    public static void stop(){
+        invalid=true;
     }
 
     private void run(){
@@ -106,7 +111,9 @@ public class GuiController {
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
         pathTransition.setAutoReverse(false);
-        pathTransition.setOnFinished(it ->{dotToNode.get(node).requestPermissionToEnterCS();});
+        pathTransition.setOnFinished(it -> {if(!invalid){
+            dotToNode.get(node).requestPermissionToEnterCS();
+        }});
         pathTransition.play();
 
         return pathTransition;
@@ -128,7 +135,9 @@ public class GuiController {
         pathTransition.setPath(path);
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setOnFinished(it ->{dotToNode.get(node).requestPermissionToEnterCS();});
+        pathTransition.setOnFinished(it ->{
+            if(!invalid){dotToNode.get(node).requestPermissionToEnterCS();
+            }});
         pathTransition.setAutoReverse(false);
         pathTransition.play();
 
@@ -148,8 +157,11 @@ public class GuiController {
         pathTransition.setPath(path);
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setOnFinished(ev -> {dotToNode.get(node).leaveCriticalSection();
-            animateNodeInLeftTriangle(node);
+        pathTransition.setOnFinished(ev -> {
+            if(!invalid){
+                dotToNode.get(node).leaveCriticalSection();
+                animateNodeInLeftTriangle(node);
+            }
         });
         pathTransition.play();
         return pathTransition;
@@ -167,8 +179,11 @@ public class GuiController {
         pathTransition.setPath(path);
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setOnFinished(ev -> {dotToNode.get(node).leaveCriticalSection();
-            animateNodeInRightTriangle(node);
+        pathTransition.setOnFinished(ev -> {
+            if(!invalid){
+                dotToNode.get(node).leaveCriticalSection();
+                animateNodeInRightTriangle(node);
+            }
         });
         pathTransition.play();
         return pathTransition;

@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main extends Application {
+    private Group drawingGroup;
+    private GuiController controller;
 
     public static void main(String[] args) {
         launch(args);
@@ -44,8 +47,14 @@ public class Main extends Application {
             group.getChildren().addAll(canvas);
             GridPane gp = (GridPane) loader.getNamespace().get("pane");
             Button button = (Button) loader.getNamespace().get("startButton");
-            TextField numberOfNodesField = (TextField) loader.getNamespace().get("numberOfNodes");
-            button.setOnMouseClicked((MouseEvent e) -> startSimulation(group, canvas.getGraphicsContext2D(), canvas,Integer.parseInt(numberOfNodesField.getText())));
+            Slider numberOfNodesField = (Slider) loader.getNamespace().get("numberOfNodes");
+            numberOfNodesField.setBlockIncrement(1);
+            numberOfNodesField.setMin(1);
+            numberOfNodesField.setMax(10);
+            button.setOnMouseClicked((MouseEvent e) ->{
+                button.setDisable(true);
+                startSimulation(gp,(int)numberOfNodesField.getValue());
+            });
             gp.setAlignment(Pos.CENTER);
             gp.getChildren().add(group);
             primaryStage.setScene(new Scene(root));
@@ -55,20 +64,29 @@ public class Main extends Application {
             // do nothing
         }
     }
-    private void startSimulation(Group gp, GraphicsContext gc, Canvas canvas, int numNodes){
+    private void startSimulation(GridPane gridPane,int numNodes){
+        if(drawingGroup!=null){
+            gridPane.getChildren().remove(drawingGroup);
+            GuiController.stop();
+        }
+        drawingGroup = new Group();
+        Canvas canvas = new Canvas(300,300);
+        drawingGroup.getChildren().addAll(canvas);
+        gridPane.getChildren().add(drawingGroup);
         // create the appropriate number of nodes
         List<SimulatedDistributedNode> allNodes = new ArrayList<>();
 
         for (int i = 0; i < numNodes; i++) {
-            allNodes.add(new SimulatedDistributedNode(i,GuiController.getInstance(canvas,allNodes,gp)));
+            allNodes.add(new SimulatedDistributedNode(i,GuiController.getInstance(canvas,allNodes,drawingGroup)));
         }
         // have them all connected to each other
         for (int i = 0; i < numNodes; i++) {
             allNodes.get(i).setConnectedNodes(allNodes);
         }
-        GuiController.getInstance(canvas,allNodes,gp).setDistributedNodeToDot(allNodes);
+        controller = GuiController.getInstance(canvas,allNodes,drawingGroup);
+        controller.setDistributedNodeToDot(allNodes);
         GuiController.start();
-        drawShapes(gp,gc,canvas);
+        drawShapes(drawingGroup,canvas.getGraphicsContext2D(),canvas);
     }
 
     private void drawShapes(Group gp, GraphicsContext gc, Canvas canvas) {
