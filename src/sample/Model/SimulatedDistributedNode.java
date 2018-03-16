@@ -39,6 +39,7 @@ public class SimulatedDistributedNode {
     send request to all other nodes
      */
     public void requestPermissionToEnterCS(){
+        System.out.println(this.getProcessID()+ " requesting CR access at time " + this.getTimeStamp());
        Boolean hashFULL = checkAcknowledgements();
         timeStamp++;
         connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
@@ -48,15 +49,19 @@ public class SimulatedDistributedNode {
     Then set this timestamp equal to the incoming one.
      */
     public void receiveRequest(Request req){
-        if (req.getTimestamp() > this.timeStamp)
+        if (req.getTimestamp() > this.getTimeStamp())
         {
             setTimeStamp(req.getTimestamp()+1);
+        }
+        else
+        {
+            setTimeStamp(this.getTimeStamp()+1);
         }
         switch (req.getType()){
             case Request:
                 pendingJobQueue.add(req);
                 // if requesting node is at the top of the queue, send an ack
-                if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())){
+                if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode()) && !this.getInCrit()){
                     System.out.println(this.getProcessID() + " sending ack to " + req.getRequestingNode().getProcessID()
                     +" who has time "  + pendingJobQueue.peek().getRequestingNode().getTimeStamp());
                     sendAck(req.getRequestingNode());
@@ -100,6 +105,7 @@ public class SimulatedDistributedNode {
     //send Acknowledgement
     private void sendAck(SimulatedDistributedNode node)
     {
+        this.setTimeStamp(this.getTimeStamp()+1);
         node.receiveRequest(new Request(this, reqType.Reply));
 
     }
