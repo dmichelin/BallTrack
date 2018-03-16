@@ -57,7 +57,7 @@ public class SimulatedDistributedNode {
                 pendingJobQueue.add(req);
                 // if requesting node is at the top of the queue, send an ack
                 if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())){
-                    System.out.println("sending ack to " + req.getRequestingNode().getProcessID());
+                    System.out.println(this.getProcessID() + " sending ack to " + req.getRequestingNode().getProcessID());
                     sendAck(req.getRequestingNode());
                 }
                 break;
@@ -73,7 +73,7 @@ public class SimulatedDistributedNode {
                 pendingJobQueue.poll();
                 //send an ack to the next in line if there is one such node.
                 if(!pendingJobQueue.isEmpty()) {
-                    System.out.println("CR released, sending ack to " +
+                    System.out.println("CR released, " + this.getProcessID() +  "sending ack to " +
                             pendingJobQueue.peek().getRequestingNode().getProcessID());
                     sendAck(pendingJobQueue.peek().getRequestingNode());
                 }
