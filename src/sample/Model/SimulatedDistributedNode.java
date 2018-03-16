@@ -16,7 +16,7 @@ public class SimulatedDistributedNode {
     private int timeStamp;
     private int processID;
     private boolean inCrit;
-
+    private boolean sentAck;
     /*
     Constructor
     The priorityqueue is expected to come from the priorityqueue(int initialCapacity, Comparator<Request> RequestCompare) constructor
@@ -30,6 +30,7 @@ public class SimulatedDistributedNode {
         this.processID = pid;
         this.acknowledgements = new Hashtable<>();
         this.inCrit = false;
+        this.sentAck = false;
     }
 
 
@@ -61,10 +62,12 @@ public class SimulatedDistributedNode {
             case Request:
                 pendingJobQueue.add(req);
                 // if requesting node is at the top of the queue, send an ack
-                if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode()) && !this.getInCrit()){
+                if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())
+                        && !this.getInCrit() && !this.getSentAck()){
                     System.out.println(this.getProcessID() + " sending ack to " + req.getRequestingNode().getProcessID()
-                    +" who has time "  + pendingJobQueue.peek().getRequestingNode().getTimeStamp());
+                    +" who has time "  + pendingJobQueue.peek().getTimestamp());
                     sendAck(req.getRequestingNode());
+                    this.setSentAck(true);
                 }
                 break;
             case Reply:
@@ -77,11 +80,12 @@ public class SimulatedDistributedNode {
                 break;
             case Release:
                 pendingJobQueue.poll();
+                this.setSentAck(false);
                 //send an ack to the next in line if there is one such node.
                 if(!pendingJobQueue.isEmpty()) {
                     System.out.println("CR released, " + this.getProcessID() +  " sending ack to " +
                             pendingJobQueue.peek().getRequestingNode().getProcessID() +" who had time "
-                            + pendingJobQueue.peek().getRequestingNode().getTimeStamp());
+                            + pendingJobQueue.peek().getTimestamp());
                     sendAck(pendingJobQueue.peek().getRequestingNode());
                 }
                 break;
@@ -164,5 +168,11 @@ public class SimulatedDistributedNode {
     private void setInCrit(boolean x)
     {
         this.inCrit = x;
+    }
+    private boolean getSentAck(){
+       return this.sentAck;
+    }
+    private void setSentAck(boolean x){
+       this.sentAck = x;
     }
 }

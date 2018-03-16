@@ -1,7 +1,7 @@
 package sample.Model;
 
 public class Request implements Comparable<Request> {
-    private int timestamp;
+    private static int timestamp;
     private SimulatedDistributedNode requestingNode;
     private reqType type;
 
