@@ -17,6 +17,7 @@ public class SimulatedDistributedNode {
     private int processID;
     private boolean inCrit;
     private boolean sentAck;
+    private int requestedTime;
     /*
     Constructor
     The priorityqueue is expected to come from the priorityqueue(int initialCapacity, Comparator<Request> RequestCompare) constructor
@@ -25,12 +26,13 @@ public class SimulatedDistributedNode {
     public SimulatedDistributedNode(int pid, GuiController c) {
         this.controller = c;
         this.connectedNodes = new ArrayList<>();
-        this.pendingJobQueue = new PriorityQueue<Request>();
+        this.pendingJobQueue = new PriorityQueue<Request>(10, new RequestCompare());
         this.timeStamp = 0;
         this.processID = pid;
         this.acknowledgements = new Hashtable<>();
         this.inCrit = false;
         this.sentAck = false;
+        this.requestedTime = 0;
     }
 
 
@@ -43,11 +45,17 @@ public class SimulatedDistributedNode {
         System.out.println(this.getProcessID()+ " requesting CR access at time " + this.getTimeStamp());
        Boolean hashFULL = checkAcknowledgements();
         timeStamp++;
-        connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Request)));
+        //send a request to all nodes.
+        Request sendThis = new Request(this, reqType.Request);
+        connectedNodes.forEach(node -> node.receiveRequest(sendThis));
     }
     /*
     get a request. If the timestamp attached to that request is greater than this node's timestamp,
     Then set this timestamp equal to the incoming one.
+
+    Has 3 cases: Request (add to the queue)
+                 Reply   (add the replying process to the acknowledgements hashmap)
+                 Release (remove the released node from the queue and send an ack to the one following it.)
      */
     public void receiveRequest(Request req){
         if (req.getTimestamp() > this.getTimeStamp())
@@ -61,7 +69,7 @@ public class SimulatedDistributedNode {
         switch (req.getType()){
             case Request:
                 pendingJobQueue.add(req);
-                // if requesting node is at the top of the queue, send an ack
+                // if requesting node is at the top of the queue, you aren't in critical zone, and you haven't sent an ack this pass, send an ack
                 if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())
                         && !this.getInCrit() && !this.getSentAck()){
                     System.out.println(this.getProcessID() + " sending ack to " + req.getRequestingNode().getProcessID()
@@ -69,9 +77,10 @@ public class SimulatedDistributedNode {
                     sendAck(req.getRequestingNode());
                     this.setSentAck(true);
                 }
+
                 break;
             case Reply:
-                //add acknowledgements to a hashmap so we can enter CR when it's filled
+                //add acknowledgements to a hashmap so we can enter CR when it's filled. Enter CS when we have filled our hash.
                 acknowledgements.put(req.getRequestingNode().getProcessID(), true);
                 if(acknowledgements.size()>=connectedNodes.size()){
                     System.out.println(this.getProcessID()+" entering crit region" + " at time " + this.getTimeStamp());
@@ -79,20 +88,41 @@ public class SimulatedDistributedNode {
                 }
                 break;
             case Release:
-                pendingJobQueue.poll();
+                //remove the node that has left CR and send an ack to the next node.
+                for(Request m : pendingJobQueue)
+                {
+                    if(req.getReqProcessID() == m.getReqProcessID())
+                    {
+                        pendingJobQueue.remove(m);
+                       break;
+                    }
+                }
+                if(this.getProcessID() == 0)
+                {
+                    for(Request m : pendingJobQueue)
+                    {
+                        System.out.println("Process #" + m.getReqProcessID() + " is at time " + m.getTimestamp());
+
+                    }
+                }
                 this.setSentAck(false);
                 //send an ack to the next in line if there is one such node.
                 if(!pendingJobQueue.isEmpty()) {
                     System.out.println("CR released, " + this.getProcessID() +  " sending ack to " +
                             pendingJobQueue.peek().getRequestingNode().getProcessID() +" who had time "
                             + pendingJobQueue.peek().getTimestamp());
-                    sendAck(pendingJobQueue.peek().getRequestingNode());
+                    sendAck(pendingJobQueue.poll().getRequestingNode());
                 }
                 break;
         }
 
     }
+    /*
+    Enter critical section & clear hashtable (all acknowledgements)
+     */
     private void enterCriticalSection(){
+        //RequestedTime = 0 means that we are no longer waiting to get into critical region.
+        requestedTime = 0;
         acknowledgements = new Hashtable<>();
         setInCrit(true);
         controller.EnterCriticalSection(this);
