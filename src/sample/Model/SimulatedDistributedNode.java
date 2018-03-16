@@ -7,7 +7,11 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import java.util.Hashtable;
-
+/*
+Our node class. This class keeps track of the time, the processID, and a list of connected nodes.
+Its goal is to enter & exit the Critical region, and speaks to other nodes (eventually completing a hashmap of acknowledgements)
+to do so.
+ */
 public class SimulatedDistributedNode {
     private List<SimulatedDistributedNode> connectedNodes;
     private PriorityQueue<Request> pendingJobQueue;

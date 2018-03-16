@@ -15,7 +15,11 @@
     <HBox GridPane.columnIndex="1" GridPane.rowIndex="0">
         <Text text="Number of Nodes"/>
         <Slider fx:id="numberOfNodes" />
-
+        <TextField fx:id="MinimumSpeed" text="1000" />
+        <TextField fx:id="MaximumSpeed" text="2000"/>
     </HBox>
+
     <Button fx:id="startButton" text="Start" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <Button fx:id="stopButton" text="Stop" GridPane.columnIndex="2" GridPane.rowIndex="1" disable="true"/>
+
 </GridPane>

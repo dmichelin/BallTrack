@@ -1,5 +1,8 @@
 package sample.Model;
-
+/*
+The request class is used to simulate communication. Each node sends a message comprised of a request type, sender, and
+timestamp.
+ */
 public class Request implements Comparable<Request> {
     private int timestamp;
     private SimulatedDistributedNode requestingNode;
