@@ -25,7 +25,7 @@ public class SimulatedDistributedNode {
     public SimulatedDistributedNode(int pid, GuiController c) {
         this.controller = c;
         this.connectedNodes = new ArrayList<>();
-        this.pendingJobQueue = new PriorityQueue<>();
+        this.pendingJobQueue = new PriorityQueue<Request>();
         this.timeStamp = 0;
         this.processID = pid;
         this.acknowledgements = new Hashtable<>();
@@ -57,6 +57,7 @@ public class SimulatedDistributedNode {
                 pendingJobQueue.add(req);
                 // if requesting node is at the top of the queue, send an ack
                 if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())){
+                    System.out.println("sending ack to " + req.getRequestingNode().getProcessID());
                     sendAck(req.getRequestingNode());
                 }
                 break;
@@ -64,6 +65,7 @@ public class SimulatedDistributedNode {
                 //add acknowledgements to a hashmap so we can enter CR when it's filled
                 acknowledgements.put(req.getRequestingNode().getProcessID(), true);
                 if(acknowledgements.size()>=connectedNodes.size()){
+                    System.out.println(this.getProcessID()+" entering crit region");
                     enterCriticalSection();
                 }
                 break;
@@ -71,6 +73,8 @@ public class SimulatedDistributedNode {
                 pendingJobQueue.poll();
                 //send an ack to the next in line if there is one such node.
                 if(!pendingJobQueue.isEmpty()) {
+                    System.out.println("CR released, sending ack to " +
+                            pendingJobQueue.peek().getRequestingNode().getProcessID());
                     sendAck(pendingJobQueue.peek().getRequestingNode());
                 }
                 break;
@@ -87,6 +91,7 @@ public class SimulatedDistributedNode {
      */
    public void leaveCriticalSection() {
      setInCrit(false);
+     System.out.println(this.getProcessID() + " leaving critical region");
      connectedNodes.forEach(node -> node.receiveRequest(new Request(this, reqType.Release)));
    }
 
