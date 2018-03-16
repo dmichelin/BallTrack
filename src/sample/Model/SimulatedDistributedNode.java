@@ -55,7 +55,7 @@ public class SimulatedDistributedNode {
 
     Has 3 cases: Request (add to the queue)
                  Reply   (add the replying process to the acknowledgements hashmap)
-                 Release (remove the released node from the queue and send an ack to the one following it.)
+                 Release (remove the released node from the queue and send an ack to the one following it.).
      */
     public void receiveRequest(Request req){
         if (req.getTimestamp() > this.getTimeStamp())
