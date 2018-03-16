@@ -47,13 +47,13 @@ public class Main extends Application {
             group.getChildren().addAll(canvas);
             GridPane gp = (GridPane) loader.getNamespace().get("pane");
             Button button = (Button) loader.getNamespace().get("startButton");
-            Slider numberOfNodesField = (Slider) loader.getNamespace().get("numberOfNodes");
-            numberOfNodesField.setBlockIncrement(1);
-            numberOfNodesField.setMin(1);
-            numberOfNodesField.setMax(10);
+            TextField numberOfNodesField = (TextField) loader.getNamespace().get("numberOfNodes");
+            //numberOfNodesField.setBlockIncrement(1);
+            //numberOfNodesField.setMin(1);
+            //numberOfNodesField.setMax(10);
             button.setOnMouseClicked((MouseEvent e) ->{
                 button.setDisable(true);
-                startSimulation(gp,(int)numberOfNodesField.getValue());
+                startSimulation(gp,Integer.parseInt(numberOfNodesField.getText()));
             });
             gp.setAlignment(Pos.CENTER);
             gp.getChildren().add(group);

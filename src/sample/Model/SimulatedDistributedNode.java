@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import java.util.Hashtable;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class SimulatedDistributedNode {
     private List<SimulatedDistributedNode> connectedNodes;
-    private PriorityQueue<Request> pendingJobQueue;
+    private PriorityBlockingQueue<Request> pendingJobQueue;
     private Hashtable<Integer, Boolean> acknowledgements;
     private GuiController controller;
     private int timeStamp;
@@ -25,7 +26,7 @@ public class SimulatedDistributedNode {
     public SimulatedDistributedNode(int pid, GuiController c) {
         this.controller = c;
         this.connectedNodes = new ArrayList<>();
-        this.pendingJobQueue = new PriorityQueue<>();
+        this.pendingJobQueue = new PriorityBlockingQueue<>();
         this.timeStamp = 0;
         this.processID = pid;
         this.acknowledgements = new Hashtable<>();
@@ -58,6 +59,8 @@ public class SimulatedDistributedNode {
                 // if requesting node is at the top of the queue, send an ack
                 if(pendingJobQueue.peek().getRequestingNode().equals(req.getRequestingNode())){
                     sendAck(req.getRequestingNode());
+                }else{
+                    sendAck(pendingJobQueue.peek().getRequestingNode());
                 }
                 break;
             case Reply:
@@ -93,6 +96,7 @@ public class SimulatedDistributedNode {
     //send Acknowledgement
     private void sendAck(SimulatedDistributedNode node)
     {
+        timeStamp++;
         node.receiveRequest(new Request(this, reqType.Reply));
 
     }
@@ -107,12 +111,12 @@ public class SimulatedDistributedNode {
     }
 
     //get the current jobqueue
-    private PriorityQueue<Request> getPendingJobQueue() {
+    private PriorityBlockingQueue<Request> getPendingJobQueue() {
         return pendingJobQueue;
     }
 
     //set the current jobqueue.
-    private void setPendingJobQueue(PriorityQueue<Request> pendingJobQueue) {
+    private void setPendingJobQueue(PriorityBlockingQueue<Request> pendingJobQueue) {
         this.pendingJobQueue = pendingJobQueue;
     }
     //Get Timestamp

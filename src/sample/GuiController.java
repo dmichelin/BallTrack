@@ -153,7 +153,7 @@ public class GuiController {
         Path path = new Path();
         path.getElements().addAll(leftTriangle);
         PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(500));
+        pathTransition.setDuration(Duration.millis(50));
         pathTransition.setPath(path);
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
@@ -175,7 +175,7 @@ public class GuiController {
         Path path = new Path();
         path.getElements().addAll(leftTriangle);
         PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(500));
+        pathTransition.setDuration(Duration.millis(50));
         pathTransition.setPath(path);
         pathTransition.setNode(node);
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
